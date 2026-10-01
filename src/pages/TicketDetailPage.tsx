@@ -40,14 +40,14 @@ function TicketDetailPage() {
             ← 티켓 목록
           </Link>
 
-          <h1 className="mt-2 text-2xl font-bold tracking-tight md:text-3xl">
+          <h1 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">
             티켓 상세
           </h1>
         </div>
 
         <Link
           to={`/tickets/${ticket.id}/edit`}
-          className="inline-flex self-start items-center justify-center rounded-xl bg-[#14324B] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#204A68] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D717F]"
+          className="glass-create-button"
         >
           티켓 수정
         </Link>

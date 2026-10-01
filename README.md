@@ -1,75 +1,230 @@
-# React + TypeScript + Vite
+# TASKFLOW - 티켓 관리 웹 애플리케이션
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 1. 프로젝트 설명
 
-Currently, two official plugins are available:
+회사 내부에서 발생하는 업무 요청을 등록하고,
+담당자와 진행 상태를 관리하는 웹 애플리케이션입니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+React와 TypeScript를 사용해 목록, 상세, 생성, 수정 화면을 구현했습니다.
+검색과 필터를 조합해 필요한 티켓을 찾을 수 있으며,
+캘린더에서 마감일을 확인할 수 있습니다.
 
-## React Compiler
+별도의 서버 없이 mock 데이터로 시작하며,
+생성 및 수정한 데이터는 브라우저의 localStorage에 저장합니다.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 2. 실행 방법
 
-## Expanding the ESLint configuration
+### 프로젝트 내려받기
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+git clone https://github.com/kkhywon/ticket-manager.git
+cd ticket-manager
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### 패키지 설치 및 개발 서버 실행
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+Node.js와 npm이 설치된 환경에서 실행합니다.
+명령어는 package.json이 있는 폴더에서 입력합니다.
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm install
+npm run dev
 ```
 
-# ticket-manager
+실행 후 터미널에 표시되는 로컬 주소로 접속합니다.
+
+### 빌드 및 빌드 결과 확인
+
+```bash
+npm run build
+npm run preview
+```
+
+### 코드 검사
+
+```bash
+npm run lint
+```
+
+## 3. 사용 기술
+
+React: 컴포넌트 기반 화면 구성과 입력, 검색, 필터 상태 관리
+TypeScript: 티켓, 담당자, 상태 값의 타입 정의
+React Router: 페이지 이동과 티켓 번호에 따른 동적 라우팅
+Vite: 개발 서버 실행 및 배포용 빌드
+Tailwind CSS: 화면 스타일과 반응형 레이아웃 구현
+CSS: 유리 효과, 그라데이션, 버튼 상호작용 구현
+localStorage: 브라우저에 티켓 데이터 저장
+Git: 변경 이력 관리 및 코드 공유
+
+## 4. 주요 기능
+
+### 티켓 목록 및 검색
+
+- 생성일 기준 최신순으로 티켓 표시
+- 하나의 검색창에서 제목과 담당자 이름 검색
+- 상태와 담당자 복수 선택 필터
+- 미배정 티켓 필터
+- 검색어와 필터 조건을 조합한 목록 조회
+- 검색, 필터 적용 결과 건수 표시
+
+### 티켓 상세
+
+- 제목, 내용, 담당자, 상태, 생성일 확인
+- 수정 화면으로 이동
+- 존재하지 않는 티켓에 대한 안내 표시
+
+### 티켓 생성 및 수정
+
+- 제목, 내용, 담당자, 상태, 마감일 입력
+- 제목과 내용의 공백 입력 방지
+- 공통 입력 컴포넌트를 생성, 수정 화면에서 재사용
+- 생성, 수정 결과를 localStorage에 저장
+- 저장 실패 시 입력 내용을 유지하고 오류 안내 표시
+
+### 담당자 추가
+
+- 티켓 생성, 수정 화면에서 담당자 추가
+- 이름이 비어 있거나 공백만 있으면 등록 차단
+- 추가한 담당자를 바로 선택
+- 같은 이름의 담당자도 서로 다른 ID로 등록
+- 추가한 담당자를 localStorage에 저장
+
+### 캘린더
+
+- 티켓 마감일을 달력에 표시
+- 이전 달과 다음 달 이동
+- 티켓 상세 화면으로 이동
+
+### 예외 상태 및 반응형 화면
+
+- 목록 조회 중 로딩 안내
+- 조회 실패 안내와 다시 시도
+- 등록된 티켓이 없는 경우와 검색 결과가 없는 경우 구분
+- pc에서는 표, 모바일에서는 카드 형태로 목록 표시
+- 화면 크기에 따라 사이드 메뉴와 하단 메뉴 전환
+
+## 5. 프로젝트 구조
+
+src 내부의 주요 폴더와 역할은 다음과 같습니다.
+
+`pages/` 목록, 상세, 생성, 수정, 캘린더 페이지
+`components/tickets/` 상태 배지 등 티켓 관련 컴포넌트
+`components/common/` 로딩, 오류, 빈 화면 안내
+`components/calendar/` 캘린더 화면을 구성하는 컴포넌트
+`layout/` 공통 레이아웃과 내비게이션
+`services/ticketService.ts` 티켓 조회, 생성, 수정 및 저장 처리
+`services/userService.ts` 담당자 조회, 추가 및 저장 데이터 검사
+`types/` 타입 정의
+`mocks/` 초기 티켓 데이터와 담당자 목록
+`utils/` 날짜 표시 등 공통 유틸리티 함수
+
+### 주요 공통 컴포넌트
+
+`TicketForm` 생성, 수정 화면에서 사용하는 공통 입력 영역
+`TicketFilter` 통합 검색창과 상태, 담당자 필터
+`AssigneeSelect` 담당자 선택과 신규 담당자 추가
+`StatusBadge` 티켓 상태에 대응하는 한글 표시
+`LoadingState` 데이터 조회 중 안내
+`ErrorState` 오류 메세지와 재시도 버튼
+`EmptyState` 데이터 또는 검색 결과가 없을 때 안내
+
+### 주요 라우팅
+
+`/tickets` 티켓 목록
+`/tickets/new` 티켓 생성
+`/tickets/:ticketId` 티켓 상세
+`/tickets/:ticketId/edit` 티켓 수정
+`/tickets/calendar` 마감일 캘린더
+
+## 6. 설계하면서 고민했던 부분
+
+### 화면과 데이터 처리의 역할 분리
+
+컴포넌트 안에서 데이터를 직접 관리하면
+여러 화면에서 조회, 저장 코드가 반복될 수 있다고 생각했습니다.
+
+티켓 처리 로직을 ticketService로 분리하고,
+화면에서는 필요한 함수를 호출하도록 구성했습니다.
+초기 데이터와 담당자 목록도 mocks 폴더에서 관리했습니다.
+
+### 생성, 수정 입력 폼의 공통화
+
+처음에는 생성 페이지와 수정 페이지에 입력 ui를 각각 작성했습니다.
+이후 입력 항목과 스타일이 대부분 같아,
+변경할 때 두 파일을 함께 수정해야 한다는 문제가 보였습니다.
+
+중복된 입력 영역을 `TicketForm`으로 분리하고,
+생성 페이지는 빈 입력값을,
+수정 페이지는 기존 티켓의 입력값을 전달하도록 변경했습니다.
+
+입력 ui는 공유하지만 저장 동작은 다르므로,
+검증, 서비스 호출, 저장 후 이동은 각 페이지에서 처리합니다.
+
+### 상태를 관리하는 위치
+
+검색어와 필터 선택값은 필터 ui뿐 아니라
+결과 목록을 계산할 때도 필요합니다.
+
+따라서 해당 상태를 `TicketPage`에서 관리하고,
+`TicketFilter`에는 현재 값과 변경 함수를 전달합니다.
+
+필터링된 목록은 원본 티켓과 검색, 필터 값으로 계산할 수 있으므로
+별도의 state로 저장하지 않았습니다.
+원본과 결과를 각각 갱신하면서 생길 수 있는 불일치를 줄이기 위한 선택입니다.
+
+### 검색과 필터의 조합 방식
+
+초기 설계에서는 담당자 필터 안에 이름 검색을 두려고 했지만,
+제목과 담당자를 한 곳에서 찾을 수 있도록 통합 검색창으로 변경했습니다.
+
+제목 또는 담당자 이름에 검색어가 포함되면 검색 조건을 통과합니다.
+같은 필터 안에서는 선택한 항목 중 하나에 해당하면 통과하고,
+검색, 상태, 담당자 조건 사이에서는 모든 조건을 만족해야 표시합니다.
+
+필터의 선택 배열이 비어 있으면
+해당 조건에 제한이 없는 '전체' 상태로 처리했습니다.
+
+### 담당자 미배정과 동명이인 처리
+
+담당자가 아직 정해지지 않은 업무도 등록할 수 있도록
+`Ticket`의 `assignee`를 선택 속성으로 정의했습니다.
+
+담당자가 없는 티켓은 화면에서 '미배정'으로 표시합니다.
+필터에서는 숫자 형태의 담당자 ID와 구분하기 위해
+'`unassigned`' 값을 사용했습니다.
+
+담당자 이름은 중복될 수 있으므로,
+선택과 필터링에는 이름 대신 고유한 ID를 사용합니다.
+화면에는 이름만 표시합니다.
+
+### 새로고침 이후 데이터 유지와 실패 처리
+
+메모리에만 데이터를 저장하면 새로고침할 때 변경 내용이 사라집니다.
+서버 없이도 생성, 수정 결과를 유지하기 위해 localStorage를 사용했습니다.
+
+저장할 때는 localStorage 기록에 성공한 후 메모리의 목록을 갱신합니다.
+저장에 실패했는데 화면에서 사용하는 데이터만 변경되는 상황을 방지하기 위해서입니다.
+
+생성, 수정 화면에서는 저장 오류를 안내하고 입력값을 유지해
+다시 시도할 수 있도록 했습니다.
+
+### 저장 데이터 검증
+
+TypeScript의 타입 선언만으로는
+localStorage에서 읽은 데이터의 실제 형식을 보장할 수 없습니다.
+
+티켓 데이터를 읽을 때 배열 여부뿐 아니라
+각 항목의 ID, 제목, 내용, 상태, 날짜, 담당자 형식을 검사하도록 보완했습니다.
+담당자 데이터도 ID와 이름의 형식을 검사합니다.
+
+처음 접속하거나 저장 데이터를 읽고 검증하는 데 실패하면
+기본 mock 데이터를 사용합니다.
+이 과정에서 오류는 콘솔에 기록합니다.
+
+### 현재 한계와 개선 방향
+
+- 데이터가 브라우저별로 저장되므로 여러 사용자가 같은 데이터를 공유할 수 없습니다.
+- 동명이인은 내부 ID로 구별하지만 화면에는 이름만 보여 선택 시 혼동할 수 있습니다. 부서 등 구별 정보를 추가할 수 있습니다.
+- 저장 데이터 읽기 실패 시 기본 데이터를 표시하므로, 사용자에게 복구 상황을 알리는 안내를 보완할 수 있습니다.
+- 향후 서버 API를 연결하면 실제 요청 실패와 저장 대기 상태에 대한 처리를 확장해야 합니다.

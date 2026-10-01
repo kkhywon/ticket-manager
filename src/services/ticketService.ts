@@ -4,6 +4,57 @@ import type { Ticket } from '../types'
 // 화면들이 함께 사용할 티켓 목록
 const STORAGE_KEY = 'ticket-manager-tickets'
 
+// 저장된 값이 올바른 티켓인지 검사
+function isTicket(value: unknown): value is Ticket {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const ticket = value as Record<string, unknown>
+
+  const validAssignee =
+    ticket.assignee === undefined ||
+    (
+      typeof ticket.assignee === 'object' &&
+      ticket.assignee !== null &&
+      'id' in ticket.assignee &&
+      typeof ticket.assignee.id === 'number' &&
+      Number.isSafeInteger(ticket.assignee.id) &&
+      ticket.assignee.id > 0 &&
+      'name' in ticket.assignee &&
+      typeof ticket.assignee.name === 'string' &&
+      ticket.assignee.name.trim().length > 0
+    )
+
+  return (
+    typeof ticket.id === 'number' &&
+    Number.isSafeInteger(ticket.id) &&
+    ticket.id > 0 &&
+    typeof ticket.title === 'string' &&
+    ticket.title.trim().length > 0 &&
+    typeof ticket.description === 'string' &&
+    ticket.description.trim().length > 0 &&
+    (
+      ticket.status === 'open' ||
+      ticket.status === 'in_progress' ||
+      ticket.status === 'resolved'
+    ) &&
+    typeof ticket.createdAt === 'string' &&
+    Number.isFinite(Date.parse(ticket.createdAt)) &&
+    (
+      ticket.dueDate === undefined ||
+      ticket.dueDate === '' ||
+      (
+        typeof ticket.dueDate === 'string' &&
+        /^\d{4}-\d{2}-\d{2}$/.test(ticket.dueDate) &&
+        Number.isFinite(Date.parse(ticket.dueDate)) &&
+        new Date(ticket.dueDate).toISOString().slice(0, 10) === ticket.dueDate
+      )
+    ) &&
+    validAssignee
+  )
+}
+
 // 저장된 티켓을 읽고, 읽을 수 없으면 기본 데이터 사용
 function loadTickets(): Ticket[] {
   try {
@@ -15,11 +66,11 @@ function loadTickets(): Ticket[] {
 
     const parsed: unknown = JSON.parse(saved)
 
-    if (!Array.isArray(parsed)) {
-      throw new Error('저장된 티켓이 배열 형태가 아닙니다.')
-    }
+    if (!Array.isArray(parsed) || !parsed.every(isTicket)) {
+  throw new Error('저장된 티켓 데이터 형식이 올바르지 않습니다.')
+}
 
-    return parsed as Ticket[]
+return parsed
   } catch (error) {
     console.error('저장된 티켓을 불러오지 못했습니다.', error)
     return [...mockTickets]

@@ -4,17 +4,16 @@ import { fetchTickets } from '../services/ticketService'
 import StatusBadge from '../components/tickets/StatusBadge'
 import { formatDate } from '../utils/dateUtils'
 import type { Ticket, TicketStatus } from '../types'
-import { USERS } from '../mocks/users'
+import { getUsers } from '../services/userService'
+import LoadingState from '../components/common/LoadingState'
+import ErrorState from '../components/common/ErrorState'
+import EmptyState from '../components/common/EmptyState'
+import TicketFilter from '../components/tickets/TicketFilter'
+import type { AssigneeFilter } from '../components/tickets/TicketFilter'
 
-const STATUS_OPTIONS: { value: TicketStatus; label: string }[] = [
-  { value: 'open', label: '진행 전' },
-  { value: 'in_progress', label: '진행' },
-  { value: 'resolved', label: '완료' },
-]
-
-type AssigneeFilter = number | 'unassigned'
 
 function TicketsPage() {
+  const users = getUsers()
   // 티켓 목록과 조회 상태 관리
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -109,32 +108,12 @@ function TicketsPage() {
 
   // 조회 중 안내
   if (isLoading) {
-    return (
-      <section className="glass-panel px-6 py-16 text-center">
-        <p role="status" className="text-sm text-[#526D82]">
-          티켓을 불러오는 중입니다…
-        </p>
-      </section>
-    )
+    return <LoadingState />
   }
 
   // 조회 실패 안내와 다시 시도
   if (error) {
-    return (
-      <section className="glass-panel px-6 py-16 text-center">
-        <p role="alert" className="font-medium text-[#14324B]">
-          {error}
-        </p>
-
-        <button
-          type="button"
-          onClick={retryLoading}
-          className="mt-4 rounded-lg bg-[#24485A] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#193A4B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#476C80]"
-        >
-          다시 시도
-        </button>
-      </section>
-    )
+    return <ErrorState message={error} onRetry={retryLoading} />
   }
 
   return (
@@ -167,119 +146,26 @@ function TicketsPage() {
         </div>
       </header>
 
-      {/* 제목과 담당자 이름 통합 검색 */}
-      <label className="block">
-        <span className="mb-2 block text-sm font-medium text-[#425D73]">
-          티켓 검색
-        </span>
-
-        <input
-          type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="제목 또는 담당자 이름을 검색하세요"
-          className="w-full rounded-lg border border-[#14324B]/15 bg-white/25 px-4 py-3 text-base outline-none placeholder:text-[#718694] focus:border-[#476C80] focus:bg-white/40 focus:ring-2 focus:ring-[#476C80]/10 sm:text-sm"
-        />
-      </label>
-
-      {/* 상태 복수 선택 */}
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium text-[#425D73]">
-          상태
-        </legend>
-
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => setSelectedStatuses([])}
-            aria-pressed={selectedStatuses.length === 0}
-            className={`rounded-lg border px-3 py-2 text-sm ${
-              selectedStatuses.length === 0
-                ? 'border-[#476C80] bg-white/40 text-[#14324B]'
-                : 'border-[#14324B]/15 bg-white/15 text-[#526D82]'
-            }`}
-          >
-            전체
-          </button>
-
-          {STATUS_OPTIONS.map((option) => (
-            <label
-              key={option.value}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#14324B]/15 bg-white/20 px-3 py-2 text-sm"
-            >
-              <input
-                type="checkbox"
-                checked={selectedStatuses.includes(option.value)}
-                onChange={() => toggleStatus(option.value)}
-                className="h-4 w-4 accent-[#24485A]"
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      {/* 담당자 복수 선택 */}
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium text-[#425D73]">
-          담당자
-        </legend>
-
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => setSelectedAssignees([])}
-            aria-pressed={selectedAssignees.length === 0}
-            className={`rounded-lg border px-3 py-2 text-sm ${
-              selectedAssignees.length === 0
-                ? 'border-[#476C80] bg-white/40 text-[#14324B]'
-                : 'border-[#14324B]/15 bg-white/15 text-[#526D82]'
-            }`}
-          >
-            전체
-          </button>
-
-          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#14324B]/15 bg-white/20 px-3 py-2 text-sm">
-            <input
-              type="checkbox"
-              checked={selectedAssignees.includes('unassigned')}
-              onChange={() => toggleAssignee('unassigned')}
-              className="h-4 w-4 accent-[#24485A]"
-            />
-            미배정
-          </label>
-
-          {USERS.map((user) => (
-            <label
-              key={user.id}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#14324B]/15 bg-white/20 px-3 py-2 text-sm"
-            >
-              <input
-                type="checkbox"
-                checked={selectedAssignees.includes(user.id)}
-                onChange={() => toggleAssignee(user.id)}
-                className="h-4 w-4 accent-[#24485A]"
-              />
-              {user.name}
-            </label>
-          ))}
-        </div>
-
-        <p className="mt-3 text-xs text-[#526D82]">
-          {selectedAssignees.length > 0
-            ? `${selectedAssignees.length}개 항목 선택됨`
-            : '담당자를 선택하면 해당 담당자의 티켓만 표시됩니다.'}
-        </p>
-      </fieldset>
-
+     <TicketFilter
+        users={users}
+        search={search}
+        selectedStatuses={selectedStatuses}
+        selectedAssignees={selectedAssignees}
+        onSearchChange={setSearch}
+        onToggleStatus={toggleStatus}
+        onToggleAssignee={toggleAssignee}
+        onClearStatuses={() => setSelectedStatuses([])}
+        onClearAssignees={() => setSelectedAssignees([])}
+      />
+      
       {/* 목록과 결과 건수 */}
       <div className="glass-panel overflow-hidden">
         <div className="flex items-center gap-2 border-b border-[#14324B]/10 px-5 py-4 md:px-6">
-          <h2 className="text-sm font-medium">티켓 목록</h2>
+          <h2 className="text-sm font-medium leading-5">티켓 목록</h2>
 
           <span
             aria-live="polite"
-            className="rounded-full bg-[#14324B]/8 px-2.5 py-0.5 text-xs font-medium"
+            className="inline-flex h-6 items-center justify-center rounded-full bg-[#14324B]/8 px-2.5 text-xs font-medium leading-5"
           >
             {hasFilters
               ? `${filteredTickets.length} / ${tickets.length}건`
@@ -288,19 +174,10 @@ function TicketsPage() {
         </div>
 
         {tickets.length === 0 ? (
-          <div className="px-6 py-16 text-center">
-            <p className="font-medium">등록된 티켓이 없습니다.</p>
-            <p className="mt-2 text-sm text-[#526D82]">
-              새 티켓 버튼으로 첫 업무 요청을 등록하세요.
-            </p>
-          </div>
-        ) : filteredTickets.length === 0 ? (
-          <div className="px-6 py-16 text-center">
-            <p className="font-medium">조건에 맞는 티켓이 없습니다.</p>
-            <p className="mt-2 text-sm text-[#526D82]">
-              검색어나 상태·담당자 선택을 변경해보세요.
-            </p>
-          </div>
+          <EmptyState
+            title='등록된 티켓이 없습니다.'
+            description='새 티켓 버튼으로 첫 업무 요청을 등록하세요.'
+            />
         ) : (
           <>
             {/* PC용 표 */}
@@ -310,7 +187,7 @@ function TicketsPage() {
                   티켓 제목, 담당자, 생성일, 상태 목록
                 </caption>
 
-                <thead className="border-b border-[#14324B]/20 bg-[#14324B]/[0.07] text-xs text-[#34536B]">
+                <thead className="relative z-10 bg-[#14324B]/[0.07] text-xs text-[#34536B] shadow-[0_5px_8px_-4px_rgba(20,50,75,0.25)]">
                   <tr>
                     <th scope="col" className="px-6 py-3 font-medium">
                       제목
