@@ -3,6 +3,8 @@ export type TicketStatus = 'open' | 'in_progress' | 'resolved'
 export interface User {
   id: number
   name: string
+  department?: string
+  isDeleted?: boolean
 }
 
 export interface Ticket {
@@ -12,5 +14,7 @@ export interface Ticket {
   status: TicketStatus
   assignee?: User
   createdAt: string
+  startDate?: string
   dueDate?: string
+  isDeleted?: boolean
 }

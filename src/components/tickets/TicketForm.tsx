@@ -7,6 +7,7 @@ export interface TicketFormValues {
   description: string
   assigneeId: string
   status: TicketStatus
+  startDate: string
   dueDate: string
 }
 
@@ -77,7 +78,7 @@ function TicketForm({ values, onChange }: TicketFormProps) {
       </div>
 
       {/* 담당자·상태·마감일 */}
-      <div className="mt-7 grid gap-5 border-t border-[#14324B]/10 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-7 grid gap-5 border-t border-[#14324B]/10 pt-6 sm:grid-cols-2 lg:grid-cols-4">
         <AssigneeSelect
           value={values.assigneeId}
           onChange={(value) => updateField('assigneeId', value)}
@@ -105,6 +106,21 @@ function TicketForm({ values, onChange }: TicketFormProps) {
             <option value="in_progress">진행</option>
             <option value="resolved">완료</option>
           </select>
+        </label>
+
+        <label className={`${labelStyle} min-w-0`}>
+          시작일
+          <span className="ml-2 text-xs font-normal text-[#526D82]">
+            (선택)
+          </span>
+          <input
+            type="date"
+            value={values.startDate}
+            onChange={(event) =>
+              updateField('startDate', event.target.value)
+            }
+            className={inputStyle}
+          />
         </label>
 
         <label className={`${labelStyle} min-w-0`}>

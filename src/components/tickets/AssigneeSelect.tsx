@@ -15,6 +15,7 @@ function AssigneeSelect({
   const [users, setUsers] = useState(getUsers)
   const [isAdding, setIsAdding] = useState(false)
   const [name, setName] = useState('')
+  const [department, setDepartment] = useState('')
   const [error, setError] = useState('')
 
   // 담당자 추가 후 선택 목록과 선택값 갱신
@@ -22,11 +23,12 @@ function AssigneeSelect({
     setError('')
 
     try {
-      const newUser = createUser(name)
+      const newUser = createUser(name, department)
 
       setUsers(getUsers())
       onChange(String(newUser.id))
       setName('')
+      setDepartment('')
       setIsAdding(false)
     } catch (error) {
       setError(
@@ -41,6 +43,7 @@ function AssigneeSelect({
   function handleCancel() {
     setIsAdding(false)
     setName('')
+    setDepartment('')
     setError('')
   }
 
@@ -58,7 +61,7 @@ function AssigneeSelect({
 
           {users.map((user) => (
             <option key={user.id} value={user.id}>
-              {user.name} 
+              {user.name} · {user.department || '부서 미설정'}
             </option>
           ))}
         </select>
@@ -83,6 +86,17 @@ function AssigneeSelect({
                 }
               }}
               placeholder="이름을 입력하세요"
+              className={inputClassName}
+            />
+          </label>
+
+          <label className='mt-3 block text-sm text-[#425D73]'>
+            부서
+            <input
+              type='text'
+              value={department}
+              onChange={(event) => setDepartment(event.target.value)}
+              placeholder='예: 디자인팀'
               className={inputClassName}
             />
           </label>

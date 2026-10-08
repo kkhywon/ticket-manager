@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { fetchTickets } from '../services/ticketService'
-import StatusBadge from '../components/tickets/StatusBadge'
-import { formatDate } from '../utils/dateUtils'
+import TicketCard from '../components/tickets/TicketCard'
 import type { Ticket, TicketStatus } from '../types'
 import { getUsers } from '../services/userService'
 import LoadingState from '../components/common/LoadingState'
@@ -137,7 +136,7 @@ function TicketsPage() {
             캘린더
           </Link>
 
-          <Link to="/tickets/new" className="glass-create-button">
+          <Link to="/tickets/form" className="glass-create-button">
             <span aria-hidden="true" className="text-xl font-normal leading-none">
               +
             </span>
@@ -158,10 +157,12 @@ function TicketsPage() {
         onClearAssignees={() => setSelectedAssignees([])}
       />
       
-      {/* 목록과 결과 건수 */}
-      <div className="glass-panel overflow-hidden">
-        <div className="flex items-center gap-2 border-b border-[#14324B]/10 px-5 py-4 md:px-6">
-          <h2 className="text-sm font-medium leading-5">티켓 목록</h2>
+     {/* 목록과 결과 건수 */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-medium leading-5">
+            티켓 목록
+          </h2>
 
           <span
             aria-live="polite"
@@ -175,108 +176,22 @@ function TicketsPage() {
 
         {tickets.length === 0 ? (
           <EmptyState
-            title='등록된 티켓이 없습니다.'
-            description='새 티켓 버튼으로 첫 업무 요청을 등록하세요.'
-            />
+            title="등록된 티켓이 없습니다."
+            description="새 티켓 버튼으로 첫 업무 요청을 등록하세요."
+          />
+        ) : filteredTickets.length === 0 ? (
+          <EmptyState
+            title="조건에 맞는 티켓이 없습니다."
+            description="검색어를 바꾸거나 선택한 필터를 해제해주세요."
+          />
         ) : (
-          <>
-            {/* PC용 표 */}
-            <div className="hidden md:block">
-              <table className="w-full table-fixed text-left">
-                <caption className="sr-only">
-                  티켓 제목, 담당자, 생성일, 상태 목록
-                </caption>
-
-                <thead className="relative z-10 bg-[#14324B]/[0.07] text-xs text-[#34536B] shadow-[0_5px_8px_-4px_rgba(20,50,75,0.25)]">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 font-medium">
-                      제목
-                    </th>
-                    <th
-                      scope="col"
-                      className="w-24 px-3 py-3 font-medium"
-                    >
-                      담당자
-                    </th>
-                    <th
-                      scope="col"
-                      className="w-32 px-3 py-3 font-medium"
-                    >
-                      생성일
-                    </th>
-                    <th
-                      scope="col"
-                      className="w-28 px-3 py-3 font-medium"
-                    >
-                      상태
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-[#14324B]/8">
-                  {filteredTickets.map((ticket) => (
-                    <tr
-                      key={ticket.id}
-                      className="transition-colors hover:bg-white/25"
-                    >
-                      <td className="px-6 py-5">
-                        <Link
-                          to={`/tickets/${ticket.id}`}
-                          title={ticket.title}
-                          className="block truncate font-medium hover:text-[#0D717F] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#476C80]"
-                        >
-                          {ticket.title}
-                        </Link>
-                      </td>
-
-                      <td className="break-words px-3 py-5 text-sm text-[#425D73]">
-                        {ticket.assignee?.name ?? '미배정'}
-                      </td>
-
-                      <td className="px-3 py-5 text-xs text-[#526D82]">
-                        {formatDate(ticket.createdAt)}
-                      </td>
-
-                      <td className="px-3 py-5">
-                        <StatusBadge status={ticket.status} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* 모바일용 카드 목록 */}
-            <ul className="divide-y divide-[#14324B]/10 md:hidden">
-              {filteredTickets.map((ticket) => (
-                <li key={ticket.id}>
-                  <Link
-                    to={`/tickets/${ticket.id}`}
-                    className="block px-5 py-5 transition-colors hover:bg-white/25 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#476C80]"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="min-w-0 flex-1 break-words font-medium leading-6">
-                        {ticket.title}
-                      </h3>
-
-                      <div className="shrink-0">
-                        <StatusBadge status={ticket.status} />
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#526D82]">
-                      <span>
-                        담당자 · {ticket.assignee?.name ?? '미배정'}
-                      </span>
-                      <span>
-                        생성일 · {formatDate(ticket.createdAt)}
-                      </span>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </>
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filteredTickets.map((ticket) => (
+              <li key={ticket.id} className="min-w-0">
+                <TicketCard ticket={ticket} />
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </section>

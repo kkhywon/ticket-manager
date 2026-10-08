@@ -38,13 +38,16 @@ function loadUsers(): User[] {
 
 let users: User[] = loadUsers()
 
-// 담당자 목록 조회
+// 삭제되지 않은 담당자만 조회
 export function getUsers(): User[] {
-  return [...users]
+  return users.filter((user => !user.isDeleted))
 }
 
-// 이름 검사 후 새 담당자 저장
-export function createUser(name: string): User {
+// 이름과 부서를 받아 새 담당자 저장
+export function createUser(
+    name: string,
+    department: string = ''
+  ): User {
   const trimmedName = name.trim()
 
   if (!trimmedName) {
@@ -54,6 +57,7 @@ export function createUser(name: string): User {
   const newUser: User = {
     id: Math.max(0, ...users.map((user) => user.id)) + 1,
     name: trimmedName,
+    department: department.trim(),
   }
 
   const nextUsers = [...users, newUser]
@@ -67,4 +71,70 @@ export function createUser(name: string): User {
   users = nextUsers
 
   return newUser
+}
+
+// 담당자 번호로 찾아 이름과 부서 수정
+export function updateUser(
+  id: number,
+  name: string,
+  department: string
+) : User {
+  const trimmedName = name. trim()
+
+  if(!trimmedName) {
+    throw new Error('담당자 이름을 입력해주세요.')
+  }
+
+  const existingUser = users.find(
+    (user) => user.id === id && !user.isDeleted
+  )
+
+  if (!existingUser){
+    throw new Error('담당자를 찾을 수 없습니다.')
+  }
+
+  const updateUser: User = {
+    ...existingUser,
+    name: trimmedName,
+    department: department.trim(),
+  }
+
+  const nextUsers = users.map((user) =>
+    user.id === id ? updateUser : user
+  )
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUsers))
+  } catch {
+    throw new Error('담당자를 수정하지 못했습니다. 다시 시도해주세요.')
+  }
+
+  users = nextUsers
+
+  return updateUser
+}
+
+// 담당자를 삭제 상태로 저장
+export function deleteUser(id: number): void {
+  const existingUser = users.find(
+    (user) => user.id === id && !user.isDeleted
+  )
+
+  if (!existingUser) {
+    throw new Error('담당자를 찾을 수 없습니다.')
+  }
+
+  const nextUsers = users.map((user) =>
+    user.id === id
+    ? { ...user, isdeleted: true }
+    : user
+  )
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUsers))
+  } catch {
+    throw new Error('담당자를 삭제하지 못했습니다. 다시 시도해주세요.')
+  }
+
+  users = nextUsers
 }

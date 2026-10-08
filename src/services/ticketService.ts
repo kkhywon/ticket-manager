@@ -1,5 +1,18 @@
 import { mockTickets } from '../mocks/ticket'
 import type { Ticket } from '../types'
+import { getUsers } from './userService'
+
+// 티켓의 담당자 번호로 최신 담당자 정보를 연결
+function resolveAssignee(ticket: Ticket): Ticket {
+  const assignee = getUsers().find(
+    (user) => user.id === ticket.assignee?.id 
+  )
+
+  return {
+    ...ticket,
+    assignee,
+  }
+}
 
 // 화면들이 함께 사용할 티켓 목록
 const STORAGE_KEY = 'ticket-manager-tickets'
@@ -86,13 +99,16 @@ function saveTickets(nextTickets: Ticket[]) {
   tickets = nextTickets
 }
 
-// 티켓 목록을 생성일 기준 최신순으로 조회
+// 삭제되지 않은 티켓을 최신 담당자 정보와 함께 최신순으로 조회
 export function getTickets() {
-  return [...tickets].sort(
-    (a, b) =>
-      new Date(b.createdAt).getTime() -
-      new Date(a.createdAt).getTime()
-  )
+  return tickets
+    .filter((ticket) => !ticket.isDeleted)
+    .map(resolveAssignee)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime()
+    )
 }
 
 // 새 티켓 생성 후 저장
@@ -110,9 +126,13 @@ export function createTicket(
   return newTicket
 }
 
-// 번호가 일치하는 티켓 한 개 조회
+// 삭제되지 않은 티켓 한 개 조회
 export function getTicket(id: number): Ticket | undefined {
-  return tickets.find((ticket) => ticket.id === id)
+  const ticket = tickets.find(
+    (ticket) => ticket.id === id && !ticket.isDeleted
+  )
+
+  return ticket ? resolveAssignee(ticket) : undefined
 }
 
 // 기존 티켓을 수정한 새 목록 저장
@@ -120,7 +140,9 @@ export function updateTicket(
   id: number,
   data: Omit<Ticket, 'id' | 'createdAt'>
 ): Ticket {
-  const existingTicket = tickets.find((ticket) => ticket.id === id)
+  const existingTicket = tickets.find(
+    (ticket) => ticket.id === id && !ticket.isDeleted
+  )
 
   if (!existingTicket) {
     throw new Error('티켓을 찾을 수 없습니다.')
@@ -147,4 +169,23 @@ export async function fetchTickets(): Promise<Ticket[]> {
   })
 
   return getTickets()
+}
+
+// 티켓을 삭제 상태로 저장
+export function deleteTicket(id: number): void {
+  const ticket = tickets.find(
+    (ticket) => ticket.id === id && !ticket.isDeleted
+  )
+
+  if (!ticket) {
+    throw new Error('삭제할 티켓을 찾을 수 없습니다.')
+  }
+
+  const nextTickets = tickets.map((ticket) =>
+  ticket.id === id
+    ? { ...ticket, isDeleted: true }
+    : ticket
+  )
+
+  saveTickets(nextTickets)
 }

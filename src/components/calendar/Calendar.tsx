@@ -136,9 +136,17 @@ function Calendar({ tickets }: CalendarProps) {
           const dateString = toDateString(year, monthIndex, day)
           const isToday = dateString === todayString
 
-          const dayTickets = tickets.filter(
-            (ticket) => ticket.dueDate === dateString
-          )
+          // 시작일부터 마감일까지 해당하는 티켓 표시
+          const dayTickets = tickets.filter((ticket) => {
+            const start = ticket.startDate || ticket.dueDate
+            const end = ticket.dueDate || ticket.startDate
+
+            if (!start || !end) {
+              return false
+            }
+
+            return start <= dateString && dateString <= end
+          })
 
           const dateColor =
             index % 7 === 0

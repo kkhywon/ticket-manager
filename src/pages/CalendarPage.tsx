@@ -12,26 +12,29 @@ function CalendarPage() {
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-medium tracking-tight md:text-3xl">
-            마감일 캘린더
+            일정 캘린더
           </h1>
           <p className="mt-2 text-sm text-[#526D82]">
-            날짜별 마감 업무를 확인하세요.
+            업무 시작일부터 마감일까지 일정을 확인하세요.
           </p>
         </div>
 
         <Link
-          to="/tickets/new"
-          className="inline-flex self-start items-center justify-center rounded-lg bg-[#24485A] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#193A4B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#476C80]"
+          to="/tickets/form"
+          className="glass-create-button self-start"
         >
-          + 새 티켓
+          <span aria-hidden="true" className="text-xl font-normal leading-none">
+            +
+          </span>
+          <span>새 티켓</span>
         </Link>
       </header>
 
       <Calendar tickets={tickets} />
 
       <p className="text-xs leading-5 text-[#526D82]">
-        마감일이 지정된 티켓만 표시됩니다. 제목을 누르면 상세 화면으로
-        이동합니다.
+        시작일부터 마감일까지 표시됩니다. 날짜가 하나만 지정된 경우
+        해당 날짜에 표시됩니다. 제목을 누르면 상세 화면으로 이동합니다.
       </p>
     </section>
   )
